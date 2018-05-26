@@ -41,26 +41,29 @@ namespace GitViewer
             }
             set
             {
-                if (this.plotter != null)
+                if (this.plotter != value)
                 {
-                    this.plotter.CommitsChanged -= Plotter_CommitsChanged;
-                }
-                this.plotter = value;
-
-                spritesByCommitHash.Clear();
-
-                if (this.plotter != null)
-                {
-                    this.plotter.CommitsChanged += Plotter_CommitsChanged;
-
-                    if (plotter.Commits != null)
+                    if (this.plotter != null)
                     {
-                        foreach (var revision in plotter.Commits)
+                        this.plotter.CommitsChanged -= Plotter_CommitsChanged;
+                    }
+                    this.plotter = value;
+
+                    spritesByCommitHash.Clear();
+
+                    if (this.plotter != null)
+                    {
+                        this.plotter.CommitsChanged += Plotter_CommitsChanged;
+
+                        if (plotter.Commits != null)
                         {
-                            Point cellNumber = Plotter.GetCellNumber(revision.Hash);
-                            Point location = CellNumberToAbsoluteLocation(cellNumber);
-                            var sprite = new RevisionSprite(revision, location.X, location.Y, 1);
-                            spritesByCommitHash.Add(revision.Hash, sprite);
+                            foreach (var revision in plotter.Commits)
+                            {
+                                Point cellNumber = Plotter.GetCellNumber(revision.Hash);
+                                Point location = CellNumberToAbsoluteLocation(cellNumber);
+                                var sprite = new RevisionSprite(revision, location.X, location.Y, 1);
+                                spritesByCommitHash.Add(revision.Hash, sprite);
+                            }
                         }
                     }
                 }
@@ -176,21 +179,22 @@ namespace GitViewer
             const int moveAnimationDurationInMilliseconds = 2500;
             const int fadeInDurationInMilliseconds = 3000;
 
-            spritesByCommitHash.Clear();
+            Console.WriteLine("Added " + e.AddedCommits.Length + ", removed " + e.RemovedCommits.Length + ", moved " + e.MovedCommits.Length);
 
-            foreach (var revision in plotter.Commits)
+            foreach (var commit in e.AddedCommits)
             {
-                Point cellNumber = Plotter.GetCellNumber(revision.Hash);
-                Point location = CellNumberToAbsoluteLocation(cellNumber);
+                spritesByCommitHash.Add(commit.Hash, new RevisionSprite(commit));
 
-                var sprite = new RevisionSprite(revision, location.X, location.Y, 1);
-                spritesByCommitHash.Add(revision.Hash, sprite);
-            }
+                Point destinationLocation = CellNumberToAbsoluteLocation(Plotter.GetCellNumber(commit.Hash));
 
-            // When we first start up, we don't want to fade in everything.  But when commits get added, we want to animate that.
-            if (!e.WasTriggeredByInitialLoad)
-            {
-                foreach (var commit in e.AddedCommits)
+                // When we first start up, we don't want to fade in everything.  But when commits get added, we want to animate that.
+                if (e.WasTriggeredByInitialLoad)
+                {
+                    spritesByCommitHash[commit.Hash].X.PopTo(destinationLocation.X);
+                    spritesByCommitHash[commit.Hash].Y.PopTo(destinationLocation.Y);
+                    spritesByCommitHash[commit.Hash].Opacity.PopTo(1);
+                }
+                else
                 {
                     // If this commit is being copied from another commit (i.e. if the hash is identical to another commit), animate moving it from the old commit to the new one.
                     List<string> duplicateDiffCommitHashes = this.GetCommitsWithIdenticalDiff(commit.Hash);
@@ -211,29 +215,33 @@ namespace GitViewer
                             }
                         }
 
-
-                        Point destinationLocation = CellNumberToAbsoluteLocation(Plotter.GetCellNumber(commit.Hash));
-
                         spritesByCommitHash[commit.Hash].X.Animate(sourceLocation.X, destinationLocation.X, DateTime.Now, DateTime.Now.AddMilliseconds(moveAnimationDurationInMilliseconds));
                         spritesByCommitHash[commit.Hash].Y.Animate(sourceLocation.Y, destinationLocation.Y, DateTime.Now, DateTime.Now.AddMilliseconds(moveAnimationDurationInMilliseconds));
                         spritesByCommitHash[commit.Hash].Opacity.PopTo(1);
                     }
                     else
                     {
+                        spritesByCommitHash[commit.Hash].X.PopTo(destinationLocation.X);
+                        spritesByCommitHash[commit.Hash].Y.PopTo(destinationLocation.Y);
                         spritesByCommitHash[commit.Hash].Opacity.Animate(0, 1, DateTime.Now, DateTime.Now.AddMilliseconds(fadeInDurationInMilliseconds));
                     }
                 }
-                
-                foreach (var commit in e.MovedCommits)
-                {
-                    Point sourceLocation = CellNumberToAbsoluteLocation(commit.StartCellCoordinates);
-                    Point destinationLocation = CellNumberToAbsoluteLocation(commit.EndCellCoordinates);
-                    spritesByCommitHash[commit.Revision.Hash].X.Animate(sourceLocation.X, destinationLocation.X, DateTime.Now, DateTime.Now.AddMilliseconds(moveAnimationDurationInMilliseconds));
-                    spritesByCommitHash[commit.Revision.Hash].Y.Animate(sourceLocation.Y, destinationLocation.Y, DateTime.Now, DateTime.Now.AddMilliseconds(moveAnimationDurationInMilliseconds));
-                }
-
-                StartAnimationTimer(3);
             }
+                
+            foreach (var commit in e.MovedCommits)
+            {
+                Point sourceLocation = CellNumberToAbsoluteLocation(commit.StartCellCoordinates);
+                Point destinationLocation = CellNumberToAbsoluteLocation(commit.EndCellCoordinates);
+                spritesByCommitHash[commit.Revision.Hash].X.Animate(sourceLocation.X, destinationLocation.X, DateTime.Now, DateTime.Now.AddMilliseconds(moveAnimationDurationInMilliseconds));
+                spritesByCommitHash[commit.Revision.Hash].Y.Animate(sourceLocation.Y, destinationLocation.Y, DateTime.Now, DateTime.Now.AddMilliseconds(moveAnimationDurationInMilliseconds));
+            }
+
+            foreach (var commit in e.RemovedCommits)
+            {
+                spritesByCommitHash.Remove(commit.Hash);
+            }
+
+            StartAnimationTimer(3);
             Invalidate();
         }
 

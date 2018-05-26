@@ -79,7 +79,7 @@ namespace GitViewer
             if (DateTime.Now.Subtract(lastFileSystemChange).TotalMilliseconds > 700)
             {
                 fileSystemModificationWaitTimer.Stop();
-                Console.WriteLine("Filesystem changed.  Refreshing.");
+                Console.WriteLine(DateTime.Now + " Filesystem changed.  Refreshing.");
                 PopulateGraph();
             }
         }

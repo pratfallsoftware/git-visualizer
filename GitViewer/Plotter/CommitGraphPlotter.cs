@@ -231,15 +231,33 @@ namespace GitViewer
 
         private void FindChildlessCommits()
         {
-            childlessCommitHashes.Clear();
-
             Dictionary<string, List<string>> childrenOfCommitsByHash = GetChildrenOfCommitsKeyedByHash();
 
             foreach (var childrenOfCommitByHash in childrenOfCommitsByHash)
             {
                 if (childrenOfCommitByHash.Value.Count == 0)
                 {
-                    childlessCommitHashes.Add(childrenOfCommitByHash.Key);
+                    if (!childlessCommitHashes.Contains(childrenOfCommitByHash.Key))
+                    {
+                        // We want to render the branches in the same order as last time.  So if a new child commit gets added to the end of
+                        // a branch, we want to find the old branch tip (the new commit's parent) and use the same spot.
+                        int parentIndex = childlessCommitHashes.IndexOf(commitsByHash[childrenOfCommitByHash.Key].ParentHashes[0]);
+                        if (parentIndex != -1)
+                        {
+                            childlessCommitHashes.Insert(parentIndex, childrenOfCommitByHash.Key);
+                        }
+                        else
+                        {
+                            childlessCommitHashes.Add(childrenOfCommitByHash.Key);
+                        }
+                    }
+                }
+                else
+                {
+                    if (childlessCommitHashes.Contains(childrenOfCommitByHash.Key))
+                    {
+                        childlessCommitHashes.Remove(childrenOfCommitByHash.Key);
+                    }
                 }
             }
         }
