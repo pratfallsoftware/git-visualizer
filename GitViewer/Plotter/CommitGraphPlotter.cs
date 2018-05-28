@@ -63,17 +63,20 @@ namespace GitViewer
                 }
 
                 string preReversalRightmostCommitHash = GetRightmostCommitHash();
-                int maxX = cellNumberByHash[preReversalRightmostCommitHash].X;
-
-                foreach (var hash in cellNumberByHash.Keys.ToArray())
+                if (preReversalRightmostCommitHash != null)
                 {
-                    Point preReversal = cellNumberByHash[hash];
-                    cellNumberByHash[hash] = new Point(maxX - preReversal.X + 1, preReversal.Y);
+                    int maxX = cellNumberByHash[preReversalRightmostCommitHash].X;
+
+                    foreach (var hash in cellNumberByHash.Keys.ToArray())
+                    {
+                        Point preReversal = cellNumberByHash[hash];
+                        cellNumberByHash[hash] = new Point(maxX - preReversal.X + 1, preReversal.Y);
+                    }
                 }
 
                 var movedRevisions = GetMovedRevisions(oldCellNumbersByHash, cellNumberByHash);
 
-                if (addedRevisions.Count > 0 || removedRevisions.Count > 0)
+                if (addedRevisions.Count > 0 || removedRevisions.Count > 0 || movedRevisions.Count > 0)
                 {
                     CommitsChanged?.Invoke(this, new CommitsChangedEventArgs(addedRevisions.ToArray(), removedRevisions.ToArray(), movedRevisions.ToArray(), isDoingInitialLoad));
                 }

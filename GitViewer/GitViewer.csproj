@@ -70,6 +70,7 @@
       <DependentUpon>GraphViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="Plotter\CommitsChangedEventArgs.cs" />
+    <Compile Include="UI\RepositoryDirectoryController.cs" />
     <Compile Include="UI\RevisionSprite.cs" />
     <Compile Include="UI\TransparentImage.cs" />
     <Compile Include="UI\ViewerForm.cs">

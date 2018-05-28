@@ -76,7 +76,7 @@
             // changeRepoToolStripMenuItem
             // 
             this.changeRepoToolStripMenuItem.Name = "changeRepoToolStripMenuItem";
-            this.changeRepoToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.changeRepoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.changeRepoToolStripMenuItem.Text = "Change &Repo";
             this.changeRepoToolStripMenuItem.Click += new System.EventHandler(this.changeRepoToolStripMenuItem_Click);
             // 

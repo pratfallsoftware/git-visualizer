@@ -20,6 +20,7 @@ namespace GitViewer
         string gitRepo = null;
         Random random;
         DateTime lastFileSystemChange = DateTime.MinValue;
+        RepositoryDirectoryController repositoryDirectoryController = new RepositoryDirectoryController();
 
         FileSystemWatcher fileSystemWatcher;
         System.Windows.Forms.Timer fileSystemModificationWaitTimer;
@@ -32,7 +33,21 @@ namespace GitViewer
 
             random = new Random((int)DateTime.Now.Ticks);
 
-            LoadRepositoryDirectoryFromOptions();
+            fileSystemModificationWaitTimer = new System.Windows.Forms.Timer();
+            fileSystemModificationWaitTimer.Interval = 100;
+            fileSystemModificationWaitTimer.Tick += FileSystemModificationsWaitTimer_Tick;
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            gitRepo = repositoryDirectoryController.GetOrAskForRepositoryDirectory();
+            if (gitRepo == null)
+            {
+                // They canceled selecting a repo.
+                Environment.Exit(0);
+            }
 
             this.git = new Git(@"git.exe", gitRepo);
 
@@ -43,10 +58,6 @@ namespace GitViewer
             fileSystemWatcher.Deleted += FileSystemWatcher_Changed;
             fileSystemWatcher.Renamed += FileSystemWatcher_Changed;
             fileSystemWatcher.EnableRaisingEvents = true;
-
-            fileSystemModificationWaitTimer = new System.Windows.Forms.Timer();
-            fileSystemModificationWaitTimer.Interval = 100;
-            fileSystemModificationWaitTimer.Tick += FileSystemModificationsWaitTimer_Tick;
 
             PopulateGraph();
         }
@@ -132,8 +143,10 @@ namespace GitViewer
         private void ChangeRepositoryDirectory()
         {
             string oldGitRepo = gitRepo;
-            if (AskForRepositoryDirectory())
+            string directory = repositoryDirectoryController.AskForRepositoryDirectoryAndSaveIfValid();
+            if (directory != null)
             {
+                gitRepo = directory;
                 if (gitRepo != oldGitRepo)
                 {
                     this.git = new Git(@"git.exe", gitRepo);
@@ -143,52 +156,5 @@ namespace GitViewer
             }
         }
 
-        private bool AskForRepositoryDirectory()
-        {
-            var options = new Options();
-            options.Load();
-
-            using (var dialog = new FolderBrowserDialog())
-            {
-                dialog.Description = "Choose git repository directory";
-                dialog.RootFolder = Environment.SpecialFolder.DesktopDirectory;
-                if (options.RepositoryDirectory != null)
-                {
-                    dialog.SelectedPath = options.RepositoryDirectory;
-                }
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    options.RepositoryDirectory = dialog.SelectedPath;
-                    options.Save();
-
-                    gitRepo = options.RepositoryDirectory;
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        private void LoadRepositoryDirectoryFromOptions()
-        {
-            Options options = new Options();
-            options.Load();
-
-            if (options.RepositoryDirectory == null || !Directory.Exists(options.RepositoryDirectory))
-            {
-                if (!AskForRepositoryDirectory())
-                {
-                    System.Environment.Exit(1);
-                }
-                // That should have populated gitRepo with the new directory.
-            }
-            else
-            {
-                gitRepo = options.RepositoryDirectory;
-            }
-        }
     }
 }
