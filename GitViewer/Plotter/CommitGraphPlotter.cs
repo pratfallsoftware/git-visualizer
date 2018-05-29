@@ -12,6 +12,7 @@ namespace GitViewer
         private Dictionary<string, GitRevision> commitsByHash = new Dictionary<string, GitRevision>();
         private string[] commitHashes = new string[0];
         private Dictionary<string, Point> cellNumberByHash = new Dictionary<string, Point>();
+        private Dictionary<Point, string> hashByCellNumber = new Dictionary<Point, string>();
         private Dictionary<int, List<int>> listOfUsedRowsByColumn = new Dictionary<int, List<int>>();
         private List<string> childlessCommitHashes = new List<string>();
         private GitRevision rootCommit = null;
@@ -50,6 +51,7 @@ namespace GitViewer
                 var oldCellNumbersByHash = new Dictionary<string, Point>(cellNumberByHash);
 
                 cellNumberByHash.Clear();
+                hashByCellNumber.Clear();
                 listOfUsedRowsByColumn.Clear();
                 foreach (var childlessHash in childlessCommitHashes)
                 {
@@ -70,7 +72,7 @@ namespace GitViewer
                     foreach (var hash in cellNumberByHash.Keys.ToArray())
                     {
                         Point preReversal = cellNumberByHash[hash];
-                        cellNumberByHash[hash] = new Point(maxX - preReversal.X + 1, preReversal.Y);
+                        SetCellNumberForRevision(hash, new Point(maxX - preReversal.X + 1, preReversal.Y));
                     }
                 }
 
@@ -81,6 +83,24 @@ namespace GitViewer
                     CommitsChanged?.Invoke(this, new CommitsChangedEventArgs(addedRevisions.ToArray(), removedRevisions.ToArray(), movedRevisions.ToArray(), isDoingInitialLoad));
                 }
             }
+        }
+
+        private void SetCellNumberForRevision(string revisionHash, Point cellNumber)
+        {
+            if (cellNumberByHash.ContainsKey(revisionHash))
+            {
+                Point oldCellNumber = cellNumberByHash[revisionHash];
+                hashByCellNumber.Remove(oldCellNumber);
+
+                cellNumberByHash.Remove(revisionHash);
+            }
+            if (hashByCellNumber.ContainsKey(cellNumber))
+            {
+                hashByCellNumber.Remove(cellNumber);
+            }
+
+            cellNumberByHash.Add(revisionHash, cellNumber);
+            hashByCellNumber.Add(cellNumber, revisionHash);
         }
 
         private List<MovedGitRevision> GetMovedRevisions(Dictionary<string, Point> oldCellNumbersByHash, Dictionary<string, Point> cellNumberByHash)
@@ -303,7 +323,7 @@ namespace GitViewer
                     // This commit isn't an ancestor of our starting point.  Probably from another branch.
                     continue;
                 }
-                cellNumberByHash.Add(commit.Hash, new Point(x, row + offset));
+                SetCellNumberForRevision(commit.Hash, new Point(x, row + offset));
 
                 var newReservationCommitHashByRowNumber = new List<string>(reservationCommitHashByRowNumber);
 
