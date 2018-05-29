@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GitViewer
@@ -84,6 +85,31 @@ namespace GitViewer
         public void CheckOut(string entityToCheckOut)
         {
             this.RunGitCommand("checkout " + entityToCheckOut);
+        }
+
+        public string GetCurrentBranch()
+        {
+            string output = this.RunGitCommand("status");
+            string[] outputLines = output.Split('\n');
+
+            Regex onBranchRegex = new Regex("^On branch (.+)$", RegexOptions.IgnoreCase);
+            Regex detachedHeadRegex = new Regex("^HEAD detached at (.+)$", RegexOptions.IgnoreCase);
+            foreach (var outputLine in outputLines)
+            {
+                var match = onBranchRegex.Match(outputLine);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value;
+                }
+
+                match = detachedHeadRegex.Match(outputLine);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value;
+                }
+            }
+
+            return null;
         }
 
         public List<GitReference> SimulateReferencesToUnreachableCommits()

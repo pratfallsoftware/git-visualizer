@@ -111,6 +111,8 @@ namespace GitViewer
             }
         }
 
+        public string CurrentBranch { get; set; }
+
         public GraphViewer()
         {
             InitializeComponent();
@@ -479,7 +481,15 @@ namespace GitViewer
                                     break;
                             }
                             stringSize = pe.Graphics.MeasureString(branchName, fontForGitRefs);
-                            pe.Graphics.DrawString(branchName, fontForGitRefs, refBrush, new Point(location.X - (int)stringSize.Width / 2, yPosition));
+                            var style = FontStyle.Regular;
+                            if (CurrentBranch == reference.ShortName && reference.Type == GitReferenceType.Head)
+                            {
+                                style = FontStyle.Underline;
+                            }
+                            using (Font font = new Font(fontForGitRefs, style))
+                            {
+                                pe.Graphics.DrawString(branchName, font, refBrush, new Point(location.X - (int)stringSize.Width / 2, yPosition));
+                            }
                             yPosition += (int)Math.Ceiling(stringSize.Height);
                         }
                     }

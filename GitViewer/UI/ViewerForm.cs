@@ -71,6 +71,13 @@ namespace GitViewer
 
         private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
+            // Ignore changes to the lock file.  Doing a "git status" updates this file, and we do a git status when files change, so ignoring it prevents an infinite loop.
+            // Since that file is being created and destroyed, we also need to ignore changes to the .git directory itself.
+            if (Path.GetFileName(e.FullPath) == "index.lock"
+                || e.Name == ".git")
+            {
+                return;
+            }
             lastFileSystemChange = DateTime.Now;
             // Start checking a few times per second whether it's been enough time since the last filesystem change to assume things are done changing.
             StartFileSystemModificationsWaitTimer();
@@ -108,6 +115,15 @@ namespace GitViewer
             Console.WriteLine("Found " + commits.Count + " commits.");
             List<GitReference> branches = git.GetAllReferences();
             Console.WriteLine("Found " + branches.Count + " branches.");
+            string currentBranch = git.GetCurrentBranch();
+            if (currentBranch != null)
+            {
+                Console.WriteLine("Current branch: " + currentBranch);
+            }
+            else
+            {
+                Console.WriteLine("Unknown current branch.");
+            }
 
             for (int i = 0; i < branches.Count; i++)
             {
@@ -124,6 +140,7 @@ namespace GitViewer
             graphViewer.Plotter = plotter;
             plotter.Commits = commits.ToArray();
             graphViewer.Branches = branches.ToArray();
+            graphViewer.CurrentBranch = currentBranch;
             graphViewer.WatermarkText = Path.GetFileName(gitRepo);
 
             graphViewer.UpdateGraph();
