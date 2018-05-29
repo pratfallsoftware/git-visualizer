@@ -21,6 +21,8 @@ namespace GitViewer
         private ToolTip toolTip;
         private CommitToolTipRenderer commitToolTipRenderer = new CommitToolTipRenderer();
         private Timer animationTimer = null;
+        private ContextMenu revisionContextMenu = null;
+        private RevisionSprite spriteContextMenuAppliesTo = null;
         private Random random = new Random();
 
         private Dictionary<string, List<GitReference>> listOfRefsByCommitHash = new Dictionary<string, List<GitReference>>();
@@ -31,6 +33,8 @@ namespace GitViewer
         DateTime animationEndTime = DateTime.Now;
 
         public string WatermarkText { get; set; }
+
+        public event EventHandler<CheckoutRequestedEventArgs> CheckoutRequested;
 
         private CommitGraphPlotter plotter = null;
         public CommitGraphPlotter Plotter
@@ -121,6 +125,10 @@ namespace GitViewer
             fontForWatermark = new Font(this.Font.FontFamily, this.Font.SizeInPoints * 3, FontStyle.Bold);
 
             ConfigureTooltipDisplayOptions();
+
+            var checkoutMenuItem = new MenuItem("Check out");
+            checkoutMenuItem.Click += CheckoutMenuItem_Click;
+            revisionContextMenu = new ContextMenu(new MenuItem[] { checkoutMenuItem });
         }
 
         protected override void OnCreateControl()
@@ -172,6 +180,69 @@ namespace GitViewer
             // Clicking the control does not focus it automatically.
             this.Focus();
             base.OnClick(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            if (e.Button == MouseButtons.Right)
+            {
+                if (hoveredOverSprite != null)
+                {
+                    spriteContextMenuAppliesTo = hoveredOverSprite;
+                    revisionContextMenu.Show(this, e.Location);
+                }
+            }
+        }
+
+        private void CheckoutMenuItem_Click(object sender, EventArgs e)
+        {
+            string selectedRevisionHash = spriteContextMenuAppliesTo.Revision.Hash;
+
+            // There may be multiple branches pointed at this commit.
+            var candidateReferences = new List<GitReference>();
+            foreach (var reference in Plotter.Branches)
+            {
+                if (reference.CommitHash == selectedRevisionHash)
+                {
+                    candidateReferences.Add(reference);
+                }
+            }
+
+            string entityToCheckOut = null;
+
+            // Prefer local branches
+            foreach (var reference in candidateReferences)
+            {
+                if (reference.Type == GitReferenceType.Head)
+                {
+                    entityToCheckOut = reference.ShortName;
+                    break;
+                }
+            }
+
+            // If no local branches apply, try the remotes
+            if (entityToCheckOut == null)
+            {
+                foreach (var reference in candidateReferences)
+                {
+                    if (reference.Type == GitReferenceType.Remote && reference.ShortName != "HEAD")
+                    {
+                        string nameWithoutPrefix = reference.FullName.Substring("refs/".Length);
+                        entityToCheckOut = nameWithoutPrefix;
+                        break;
+                    }
+                }
+            }
+
+            // Last resort -- detached head
+            if (entityToCheckOut == null)
+            {
+                entityToCheckOut = selectedRevisionHash;
+            }
+
+            CheckoutRequested?.Invoke(this, new CheckoutRequestedEventArgs(entityToCheckOut));
         }
 
         private void Plotter_CommitsChanged(object sender, CommitsChangedEventArgs e)

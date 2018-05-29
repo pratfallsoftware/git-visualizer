@@ -62,6 +62,7 @@
     <Compile Include="Git\GitDiff.cs" />
     <Compile Include="Plotter\MovedGitRevision.cs" />
     <Compile Include="UI\AnimatedValue.cs" />
+    <Compile Include="UI\CheckoutRequestedEventArgs.cs" />
     <Compile Include="UI\CommitToolTipRenderer.cs" />
     <Compile Include="UI\GraphViewer.cs">
       <SubType>Component</SubType>

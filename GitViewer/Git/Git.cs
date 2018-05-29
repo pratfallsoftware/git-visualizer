@@ -81,7 +81,10 @@ namespace GitViewer
             return commits;
         }
 
-
+        public void CheckOut(string entityToCheckOut)
+        {
+            this.RunGitCommand("checkout " + entityToCheckOut);
+        }
 
         public List<GitReference> SimulateReferencesToUnreachableCommits()
         {

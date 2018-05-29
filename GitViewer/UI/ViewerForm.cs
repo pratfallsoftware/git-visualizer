@@ -36,6 +36,13 @@ namespace GitViewer
             fileSystemModificationWaitTimer = new System.Windows.Forms.Timer();
             fileSystemModificationWaitTimer.Interval = 100;
             fileSystemModificationWaitTimer.Tick += FileSystemModificationsWaitTimer_Tick;
+
+            graphViewer.CheckoutRequested += GraphViewer_CheckoutRequested;
+        }
+
+        private void GraphViewer_CheckoutRequested(object sender, CheckoutRequestedEventArgs e)
+        {
+            git.CheckOut(e.EntityToCheckOut);
         }
 
         protected override void OnShown(EventArgs e)
@@ -87,7 +94,7 @@ namespace GitViewer
         {
             // This function waits a short time before reloading the repo.  We often get several filesystem updates in quick succession, so this prevents us from doing a dozen reloads all at once.
 
-            if (DateTime.Now.Subtract(lastFileSystemChange).TotalMilliseconds > 700)
+            if (DateTime.Now.Subtract(lastFileSystemChange).TotalMilliseconds > 400)
             {
                 fileSystemModificationWaitTimer.Stop();
                 Console.WriteLine(DateTime.Now + " Filesystem changed.  Refreshing.");
@@ -101,6 +108,16 @@ namespace GitViewer
             Console.WriteLine("Found " + commits.Count + " commits.");
             List<GitReference> branches = git.GetAllReferences();
             Console.WriteLine("Found " + branches.Count + " branches.");
+
+            for (int i = 0; i < branches.Count; i++)
+            {
+                // Don't include origin/HEAD -- it looks weird
+                if (branches[i].FullName == "refs/remotes/origin/HEAD")
+                {
+                    branches.RemoveAt(i);
+                    break;
+                }
+            }
 
             plotter.Branches = branches.ToArray();
 

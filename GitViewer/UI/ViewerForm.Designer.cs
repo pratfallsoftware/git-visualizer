@@ -28,31 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.graphViewer = new GitViewer.GraphViewer();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changeRepoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addRandomCommitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.graphViewer = new GitViewer.GraphViewer();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // graphViewer
-            // 
-            this.graphViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.graphViewer.BackColor = System.Drawing.Color.White;
-            this.graphViewer.Branches = new GitViewer.GitReference[0];
-            this.graphViewer.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.graphViewer.Location = new System.Drawing.Point(0, 27);
-            this.graphViewer.Name = "graphViewer";
-            this.graphViewer.OriginOffset = new System.Drawing.Point(0, 0);
-            this.graphViewer.Plotter = null;
-            this.graphViewer.Size = new System.Drawing.Size(761, 401);
-            this.graphViewer.TabIndex = 0;
-            this.graphViewer.Text = "graphViewer";
-            this.graphViewer.WatermarkText = null;
             // 
             // menuStrip1
             // 
@@ -76,7 +59,7 @@
             // changeRepoToolStripMenuItem
             // 
             this.changeRepoToolStripMenuItem.Name = "changeRepoToolStripMenuItem";
-            this.changeRepoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.changeRepoToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.changeRepoToolStripMenuItem.Text = "Change &Repo";
             this.changeRepoToolStripMenuItem.Click += new System.EventHandler(this.changeRepoToolStripMenuItem_Click);
             // 
@@ -91,9 +74,27 @@
             // addRandomCommitToolStripMenuItem
             // 
             this.addRandomCommitToolStripMenuItem.Name = "addRandomCommitToolStripMenuItem";
-            this.addRandomCommitToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.addRandomCommitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
+            this.addRandomCommitToolStripMenuItem.Size = new System.Drawing.Size(227, 22);
             this.addRandomCommitToolStripMenuItem.Text = "Add random commit";
             this.addRandomCommitToolStripMenuItem.Click += new System.EventHandler(this.addRandomCommitToolStripMenuItem_Click);
+            // 
+            // graphViewer
+            // 
+            this.graphViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.graphViewer.BackColor = System.Drawing.Color.White;
+            this.graphViewer.Branches = new GitViewer.GitReference[0];
+            this.graphViewer.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.graphViewer.Location = new System.Drawing.Point(0, 27);
+            this.graphViewer.Name = "graphViewer";
+            this.graphViewer.OriginOffset = new System.Drawing.Point(0, 0);
+            this.graphViewer.Plotter = null;
+            this.graphViewer.Size = new System.Drawing.Size(761, 401);
+            this.graphViewer.TabIndex = 0;
+            this.graphViewer.Text = "graphViewer";
+            this.graphViewer.WatermarkText = null;
             // 
             // ViewerForm
             // 
