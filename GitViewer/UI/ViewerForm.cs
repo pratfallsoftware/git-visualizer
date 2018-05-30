@@ -30,11 +30,12 @@ namespace GitViewer
             InitializeComponent();
             this.KeyPreview = true;
             Text = Program.AppName;
+            this.Icon = Icon.FromHandle(Resources.Resources.Pratfall.GetHicon());
 
             random = new Random((int)DateTime.Now.Ticks);
 
             fileSystemModificationWaitTimer = new System.Windows.Forms.Timer();
-            fileSystemModificationWaitTimer.Interval = 100;
+            fileSystemModificationWaitTimer.Interval = 50;
             fileSystemModificationWaitTimer.Tick += FileSystemModificationsWaitTimer_Tick;
 
             graphViewer.CheckoutRequested += GraphViewer_CheckoutRequested;

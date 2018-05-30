@@ -61,6 +61,11 @@
     <Compile Include="Git\GitRevision.cs" />
     <Compile Include="Git\GitDiff.cs" />
     <Compile Include="Plotter\MovedGitRevision.cs" />
+    <Compile Include="Resources\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="UI\AnimatedValue.cs" />
     <Compile Include="UI\CheckoutRequestedEventArgs.cs" />
     <Compile Include="UI\CommitToolTipRenderer.cs" />
@@ -82,6 +87,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Resources\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ViewerForm.resx">
       <DependentUpon>ViewerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -112,6 +121,7 @@
     <Content Include="Resources\groovepaper.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Pratfall.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
