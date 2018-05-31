@@ -61,6 +61,7 @@
     <Compile Include="Git\GitRevision.cs" />
     <Compile Include="Git\GitDiff.cs" />
     <Compile Include="Plotter\MovedGitRevision.cs" />
+    <Compile Include="RepositoryUpdateThread.cs" />
     <Compile Include="Resources\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

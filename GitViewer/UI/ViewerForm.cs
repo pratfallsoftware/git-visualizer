@@ -21,6 +21,7 @@ namespace GitViewer
         Random random;
         DateTime lastFileSystemChange = DateTime.MinValue;
         RepositoryDirectoryController repositoryDirectoryController = new RepositoryDirectoryController();
+        RepositoryUpdateThread repositoryUpdateThread = null;
 
         FileSystemWatcher fileSystemWatcher;
         System.Windows.Forms.Timer fileSystemModificationWaitTimer;
@@ -31,7 +32,6 @@ namespace GitViewer
             this.KeyPreview = true;
             Text = Program.AppName;
             this.Icon = Icon.FromHandle(Resources.Resources.Pratfall.GetHicon());
-            showRemoteBranchesToolStripMenuItem.Checked = true;
 
             random = new Random((int)DateTime.Now.Ticks);
 
@@ -40,7 +40,9 @@ namespace GitViewer
             fileSystemModificationWaitTimer.Tick += FileSystemModificationsWaitTimer_Tick;
 
             graphViewer.CheckoutRequested += GraphViewer_CheckoutRequested;
-            graphViewer.ShowRemoteHeads = true;
+
+            graphViewer.ShowRemoteHeads = false;
+            showRemoteBranchesToolStripMenuItem.Checked = graphViewer.ShowRemoteHeads;
         }
 
         private void GraphViewer_CheckoutRequested(object sender, CheckoutRequestedEventArgs e)
@@ -60,6 +62,7 @@ namespace GitViewer
             }
 
             this.git = new Git(@"git.exe", gitRepo);
+            repositoryUpdateThread = new RepositoryUpdateThread(gitRepo, new RepositoryUpdateThread.RepositoryUpdatedDelegate(OnRepositoryUpdateComplete));
 
             fileSystemWatcher = new FileSystemWatcher(gitRepo, "*.*");
             fileSystemWatcher.IncludeSubdirectories = true;
@@ -70,6 +73,9 @@ namespace GitViewer
             fileSystemWatcher.EnableRaisingEvents = true;
 
             PopulateGraph();
+
+            Location = new Point(-10, 0);
+            Size = new Size(796, 488);
         }
 
         private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
@@ -114,36 +120,32 @@ namespace GitViewer
 
         private void PopulateGraph()
         {
-            List<GitRevision> commits = git.GetAllRevisions();
-            Console.WriteLine("Found " + commits.Count + " commits.");
-            List<GitReference> branches = git.GetAllReferences();
-            Console.WriteLine("Found " + branches.Count + " branches.");
-            string currentBranch = git.GetCurrentBranch();
-            if (currentBranch != null)
-            {
-                Console.WriteLine("Current branch: " + currentBranch);
-            }
-            else
-            {
-                Console.WriteLine("Unknown current branch.");
-            }
+            repositoryUpdateThread.BeginUpdateRepository();
+        }
 
-            for (int i = 0; i < branches.Count; i++)
+        private void OnRepositoryUpdateComplete(RepositoryUpdateThread.Result result)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((RepositoryUpdateThread.RepositoryUpdatedDelegate)OnRepositoryUpdateComplete, result);
+                return;
+            }
+            for (int i = 0; i < result.Branches.Count; i++)
             {
                 // Don't include origin/HEAD -- it looks weird
-                if (branches[i].FullName == "refs/remotes/origin/HEAD")
+                if (result.Branches[i].FullName == "refs/remotes/origin/HEAD")
                 {
-                    branches.RemoveAt(i);
+                    result.Branches.RemoveAt(i);
                     break;
                 }
             }
 
-            plotter.Branches = branches.ToArray();
+            plotter.Branches = result.Branches.ToArray();
 
             graphViewer.Plotter = plotter;
-            plotter.Commits = commits.ToArray();
-            graphViewer.Branches = branches.ToArray();
-            graphViewer.CurrentBranch = currentBranch;
+            plotter.Commits = result.Commits.ToArray();
+            graphViewer.Branches = result.Branches.ToArray();
+            graphViewer.CurrentBranch = result.CurrentBranch;
             graphViewer.WatermarkText = Path.GetFileName(gitRepo);
 
             graphViewer.UpdateGraph();
@@ -187,6 +189,7 @@ namespace GitViewer
                 if (gitRepo != oldGitRepo)
                 {
                     this.git = new Git(@"git.exe", gitRepo);
+                    repositoryUpdateThread = new RepositoryUpdateThread(gitRepo, new RepositoryUpdateThread.RepositoryUpdatedDelegate(OnRepositoryUpdateComplete));
                     fileSystemWatcher.Path = gitRepo;
                     PopulateGraph();
                 }
