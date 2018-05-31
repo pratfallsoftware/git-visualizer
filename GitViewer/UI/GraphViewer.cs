@@ -33,6 +33,7 @@ namespace GitViewer
         DateTime animationEndTime = DateTime.Now;
 
         public string WatermarkText { get; set; }
+        public bool ShowRemoteHeads { get; set; }
 
         public event EventHandler<CheckoutRequestedEventArgs> CheckoutRequested;
 
@@ -455,6 +456,11 @@ namespace GitViewer
                     {
                         foreach (GitReference reference in listOfRefsByCommitHash[commit.Hash])
                         {
+                            if (!ShowRemoteHeads && reference.Type == GitReferenceType.Remote)
+                            {
+                                continue;
+                            }
+
                             string branchName = reference.ShortName;
                             if (branchName.Length > labelMaxLength)
                             {

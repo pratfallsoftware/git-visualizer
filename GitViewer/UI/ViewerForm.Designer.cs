@@ -34,6 +34,8 @@
             this.gitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addRandomCommitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.graphViewer = new GitViewer.GraphViewer();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showRemoteBranchesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -41,6 +43,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.viewToolStripMenuItem,
             this.gitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -96,6 +99,22 @@
             this.graphViewer.Text = "graphViewer";
             this.graphViewer.WatermarkText = null;
             // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showRemoteBranchesToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // showRemoteBranchesToolStripMenuItem
+            // 
+            this.showRemoteBranchesToolStripMenuItem.CheckOnClick = true;
+            this.showRemoteBranchesToolStripMenuItem.Name = "showRemoteBranchesToolStripMenuItem";
+            this.showRemoteBranchesToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.showRemoteBranchesToolStripMenuItem.Text = "Show Remote Branches";
+            this.showRemoteBranchesToolStripMenuItem.Click += new System.EventHandler(this.showRemoteBranchesToolStripMenuItem_Click);
+            // 
             // ViewerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -121,6 +140,8 @@
         private System.Windows.Forms.ToolStripMenuItem addRandomCommitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem changeRepoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showRemoteBranchesToolStripMenuItem;
     }
 }
 

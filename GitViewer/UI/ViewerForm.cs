@@ -31,6 +31,7 @@ namespace GitViewer
             this.KeyPreview = true;
             Text = Program.AppName;
             this.Icon = Icon.FromHandle(Resources.Resources.Pratfall.GetHicon());
+            showRemoteBranchesToolStripMenuItem.Checked = true;
 
             random = new Random((int)DateTime.Now.Ticks);
 
@@ -39,6 +40,7 @@ namespace GitViewer
             fileSystemModificationWaitTimer.Tick += FileSystemModificationsWaitTimer_Tick;
 
             graphViewer.CheckoutRequested += GraphViewer_CheckoutRequested;
+            graphViewer.ShowRemoteHeads = true;
         }
 
         private void GraphViewer_CheckoutRequested(object sender, CheckoutRequestedEventArgs e)
@@ -167,7 +169,7 @@ namespace GitViewer
                 sw.WriteLine("Appending random data: " + random.Next(1000, int.MaxValue));
             }
             git.RunGitCommand("add " + filename);
-            git.RunGitCommand("commit -m \"Sample commit " + DateTime.Now.ToShortTimeString() + "\"");
+            git.RunGitCommand("commit -m \"Sample commit " + DateTime.Now.ToLongTimeString() + "\"");
         }
 
         private void changeRepoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -191,5 +193,10 @@ namespace GitViewer
             }
         }
 
+        private void showRemoteBranchesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            graphViewer.ShowRemoteHeads = showRemoteBranchesToolStripMenuItem.Checked;
+            graphViewer.UpdateGraph();
+        }
     }
 }
